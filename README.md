@@ -36,16 +36,16 @@ However, if you're using dynamically set attributes heavily, it's significantly 
 λ ruby -I./lib bench/dynamic_attribute_lookup.rb
 Dynamic attribute lookup:
                      user     system      total        real
-OpenStruct       0.650000   0.000000   0.650000 (  0.650690)
-FastOpenStruct   7.760000   0.010000   7.770000 (  7.777608)
+OpenStruct       0.660000   0.000000   0.660000 (  0.661448)
+FastOpenStruct   2.170000   0.010000   2.180000 (  2.174698)
 ```
 
 ```
 λ ruby -I./lib bench/dynamic_attribute_assignment.rb
 Dynamic attribute assignment:
                      user     system      total        real
-OpenStruct       1.220000   0.000000   1.220000 (  1.227291)
-FastOpenStruct   6.120000   0.010000   6.130000 (  6.129779)
+OpenStruct       1.190000   0.000000   1.190000 (  1.198603)
+FastOpenStruct   6.020000   0.010000   6.030000 (  6.015700)
 ```
 
 ## Licence
