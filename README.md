@@ -6,6 +6,8 @@ It should be a drop in replacement for OpenStruct.
 
 ## Performance
 
+FastOpenStruct is **very** fast when your OpenStructs tend to have static sets of attributes:
+
 ```
 λ ruby -I./lib bench/attribute_lookup.rb
                      user     system      total        real
@@ -26,6 +28,24 @@ FastOpenStruct   0.210000   0.000000   0.210000 (  0.210626)
                      user     system      total        real
 OpenStruct       0.630000   0.010000   0.640000 (  0.645598)
 FastOpenStruct   0.240000   0.000000   0.240000 (  0.239307)
+```
+
+However, if you're using dynamically set attributes heavily, it's significantly slower:
+
+```
+λ ruby -I./lib bench/dynamic_attribute_lookup.rb
+Dynamic attribute lookup:
+                     user     system      total        real
+OpenStruct       0.650000   0.000000   0.650000 (  0.650690)
+FastOpenStruct   7.760000   0.010000   7.770000 (  7.777608)
+```
+
+```
+λ ruby -I./lib bench/dynamic_attribute_assignment.rb
+Dynamic attribute assignment:
+                     user     system      total        real
+OpenStruct       1.220000   0.000000   1.220000 (  1.227291)
+FastOpenStruct   6.120000   0.010000   6.130000 (  6.129779)
 ```
 
 ## Licence
