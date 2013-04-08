@@ -4,6 +4,22 @@ FastOpenStruct is a reimplementation of Ruby's OpenStruct that avoids invalidati
 
 It should be a drop in replacement for OpenStruct.
 
+## Performance
+
+```
+λ ruby -I./lib bench/attribute_lookup.rb
+                     user     system      total        real
+OpenStruct       0.730000   0.000000   0.730000 (  0.732052)
+FastOpenStruct   0.220000   0.000000   0.220000 (  0.224770)
+```
+
+```
+λ ruby -I./lib bench/10_000_instantiations.rb
+                     user     system      total        real
+OpenStruct       0.630000   0.010000   0.640000 (  0.645598)
+FastOpenStruct   0.240000   0.000000   0.240000 (  0.239307)
+```
+
 ## Licence
 
 Simplified BSD
