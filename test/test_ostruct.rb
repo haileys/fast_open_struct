@@ -55,7 +55,7 @@ class TC_FastOpenStruct < Test::Unit::TestCase
     o = FastOpenStruct.new :a => 42
     def o.frozen?; nil end
     o.freeze
-    assert_raise(TypeError, '[ruby-core:22559]') {o.a = 1764}
+    assert_raise(RuntimeError) {o.a = 1764}
   end
 
   def test_delete_field

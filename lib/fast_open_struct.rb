@@ -1,6 +1,33 @@
 require "set"
 
 class FastOpenStruct
+  class << self
+  private
+    alias_method :__new, :new
+    private :__new
+
+    def __create_class(keys)
+      Class.new self do
+        attr_accessor *keys
+        class << self
+          alias_method :new, :__new
+          public :new
+        end
+      end
+    end
+  end
+
+  @cache = {}
+
+  def self.new(table = {})
+    keys = table.each_pair.map { |key, _| key.intern }.sort
+    if cached = @cache[keys]
+      cached.new table
+    else
+      (@cache[keys] = __create_class(keys)).new table
+    end
+  end
+
   def initialize(table = {})
     table.each_pair do |k, v|
       instance_variable_set "@#{k}", v
@@ -99,7 +126,7 @@ class FastOpenStruct
 private
   def __apparent_class__
     klass = self.class
-    klass = klass.super until klass.name
+    klass = klass.superclass until klass.name
     klass
   end
 end
