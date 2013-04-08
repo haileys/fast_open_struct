@@ -19,6 +19,7 @@ class FastOpenStruct
 
   @cache = {}
   @@ivar_for_names = {}
+  @@ivar_for_setters = {}
 
   def self.new(table = {})
     keys = table.each_pair.map { |key, _| key.intern }.sort
@@ -104,18 +105,20 @@ class FastOpenStruct
     hash
   end
 
+  EQ = "=".freeze
+
   def method_missing(sym, *args)
     if args.size == 0 and instance_variable_defined?(ivar = __ivar_for_name__(sym))
       instance_variable_get(ivar)
-    elsif args.size == 1 and sym[-1] == "="
-      self[sym[0...-1]] = args[0]
+    elsif args.size == 1 and sym[-1] == EQ
+      instance_variable_set __ivar_for_setter__(sym), args[0]
     else
       super
     end
   end
 
   def respond_to?(sym)
-    if sym[-1] == "="
+    if sym[-1] == EQ
       respond_to?(sym[0...-1])
     elsif instance_variable_defined?(__ivar_for_name__(sym))
       true
@@ -127,6 +130,10 @@ class FastOpenStruct
 private
   def __ivar_for_name__(name)
     @@ivar_for_names[name] ||= :"@#{name}"
+  end
+
+  def __ivar_for_setter__(name)
+    @@ivar_for_setters[name] ||= :"@#{name[0...-1]}"
   end
 
   def __apparent_class__
