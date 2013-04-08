@@ -18,6 +18,7 @@ class FastOpenStruct
   end
 
   @cache = {}
+  @@ivar_for_names = {}
 
   def self.new(table = {})
     keys = table.each_pair.map { |key, _| key.intern }.sort
@@ -124,9 +125,8 @@ class FastOpenStruct
   end
 
 private
-  @@ivar_for_names = {}
   def __ivar_for_name__(name)
-    @@ivar_for_names[name] ||= "@#{name}".intern
+    @@ivar_for_names[name] ||= :"@#{name}"
   end
 
   def __apparent_class__
