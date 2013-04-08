@@ -14,6 +14,14 @@ FastOpenStruct   0.220000   0.000000   0.220000 (  0.224770)
 ```
 
 ```
+λ ruby -I./lib bench/attribute_assignment.rb
+Attribute assignment:
+                     user     system      total        real
+OpenStruct       1.200000   0.000000   1.200000 (  1.196867)
+FastOpenStruct   0.210000   0.000000   0.210000 (  0.210626)
+```
+
+```
 λ ruby -I./lib bench/10_000_instantiations.rb
                      user     system      total        real
 OpenStruct       0.630000   0.010000   0.640000 (  0.645598)
