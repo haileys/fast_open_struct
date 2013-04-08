@@ -63,14 +63,16 @@ class FastOpenStruct
   def ==(other)
     return false unless other.is_a? FastOpenStruct
     ivars = instance_variables
-    return false if (ivars - other.instance_variables).any?
+    other_ivars = other.instance_variables
+    return false if (ivars - other_ivars).any? || (ivars.length != other_ivars.length)
     ivars.all? { |ivar| instance_variable_get(ivar) == other.instance_variable_get(ivar) }
   end
 
   def eql?(other)
     return false unless other.is_a? FastOpenStruct
     ivars = instance_variables
-    return false if (ivars - other.instance_variables).any?
+    other_ivars = other.instance_variables
+    return false if (ivars - other_ivars).any? || (ivars.length != other_ivars.length)
     ivars.all? { |ivar| instance_variable_get(ivar).eql? other.instance_variable_get(ivar) }
   end
 
