@@ -1,95 +1,23 @@
-require "set"
+require 'fast_open_struct.so'
 
 class FastOpenStruct
-  class << self
-  private
-    alias_method :__new, :new
-    private :__new
-
-    def __create_class(keys)
-      Class.new self do
-        attr_accessor *keys
-        class << self
-          alias_method :new, :__new
-          public :new
-        end
-      end
-    end
-  end
-
-  @cache = {}
-  @@ivar_for_names = {}
-
-  def self.new(table = {})
-    keys = table.each_pair.map { |key, _| key.intern }.sort
-    if cached = @cache[keys]
-      cached.new table
-    else
-      (@cache[keys] = __create_class(keys)).new table
-    end
-  end
-
-  def initialize(table = {})
-    table.each_pair do |k, v|
-      instance_variable_set __ivar_for_name__(k), v
-    end
-  end
-
-  def [](name)
-    instance_variable_get __ivar_for_name__(name)
-  end
-
-  def []=(name, value)
-    instance_variable_set __ivar_for_name__(name), value
-    value
-  rescue RuntimeError
-    raise TypeError, "can't modify frozen #{__apparent_class__}"
-  end
-
   def delete_field(name)
-    value = self[name]
-    remove_instance_variable __ivar_for_name__(name)
-    value
-  end
-
-  def each_pair
-    return to_enum(__method__) unless block_given?
-    instance_variables.each do |ivar|
-      yield ivar[1..-1].intern, instance_variable_get(ivar)
-    end
-    self
+    raise "Not implemented"
   end
 
   def ==(other)
     return false unless other.is_a? FastOpenStruct
-    ivars = instance_variables
-    return false if (ivars - other.instance_variables).any?
-    ivars.all? { |ivar| instance_variable_get(ivar) == other.instance_variable_get(ivar) }
+    self.to_h == other.to_h
   end
 
   def eql?(other)
     return false unless other.is_a? FastOpenStruct
-    ivars = instance_variables
-    return false if (ivars - other.instance_variables).any?
-    ivars.all? { |ivar| instance_variable_get(ivar).eql? other.instance_variable_get(ivar) }
+    self.to_h.eql? other.to_h
   end
 
   def inspect
-    str = "#<#{__apparent_class__}"
-    ids = (Thread.current[:__fast_open_struct_inspect_key__] ||= Set.new)
-    return str << " ...>" if ids.include? object_id
-    ids << object_id
-    begin
-      first = true
-      instance_variables.each do |ivar|
-        str << "," unless first
-        first = false
-        str << " #{ivar[1..-1]}=#{instance_variable_get(ivar).inspect}"
-      end
-      str << ">"
-    ensure
-      ids.delete object_id
-    end
+    return "#<#{self.class.name}>" if size == 0
+    "#<#{self.class.name} " + each_pair.map{|k, v| "#{k}=#{v.inspect}" }.join(', ') + '>'
   end
 
   def to_h
@@ -102,36 +30,5 @@ class FastOpenStruct
       hash ^= key.hash ^ value.hash
     end
     hash
-  end
-
-  def method_missing(sym, *args)
-    if args.size == 0 and instance_variable_defined?(ivar = __ivar_for_name__(sym))
-      instance_variable_get(ivar)
-    elsif args.size == 1 and sym[-1] == "="
-      self[sym[0...-1]] = args[0]
-    else
-      super
-    end
-  end
-
-  def respond_to?(sym)
-    if sym[-1] == "="
-      respond_to?(sym[0...-1])
-    elsif instance_variable_defined?(__ivar_for_name__(sym))
-      true
-    else
-      super
-    end
-  end
-
-private
-  def __ivar_for_name__(name)
-    @@ivar_for_names[name] ||= :"@#{name}"
-  end
-
-  def __apparent_class__
-    klass = self.class
-    klass = klass.superclass until klass.name
-    klass
   end
 end

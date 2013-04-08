@@ -5,3 +5,7 @@ Rake::TestTask.new do |t|
 end
 
 task :default => :test
+
+require 'rake/extensiontask'
+
+Rake::ExtensionTask.new('fast_open_struct')
