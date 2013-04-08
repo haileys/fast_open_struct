@@ -30,16 +30,16 @@ class FastOpenStruct
 
   def initialize(table = {})
     table.each_pair do |k, v|
-      instance_variable_set "@#{k}", v
+      instance_variable_set __ivar_for_name__(k), v
     end
   end
 
   def [](name)
-    instance_variable_get "@#{name}"
+    instance_variable_get __ivar_for_name__(name)
   end
 
   def []=(name, value)
-    instance_variable_set "@#{name}", value
+    instance_variable_set __ivar_for_name__(name), value
     value
   rescue RuntimeError
     raise TypeError, "can't modify frozen #{__apparent_class__}"
@@ -47,7 +47,7 @@ class FastOpenStruct
 
   def delete_field(name)
     value = self[name]
-    remove_instance_variable "@#{name}"
+    remove_instance_variable __ivar_for_name__(name)
     value
   end
 
@@ -104,10 +104,10 @@ class FastOpenStruct
   end
 
   def method_missing(sym, *args)
-    if sym[-1] == "=" and args.size == 1
+    if args.size == 0 and instance_variable_defined?(ivar = __ivar_for_name__(sym))
+      instance_variable_get(ivar)
+    elsif args.size == 1 and sym[-1] == "="
       self[sym[0...-1]] = args[0]
-    elsif args.size == 0 and instance_variable_defined?("@#{sym}")
-      self[sym]
     else
       super
     end
@@ -116,7 +116,7 @@ class FastOpenStruct
   def respond_to?(sym)
     if sym[-1] == "="
       respond_to?(sym[0...-1])
-    elsif instance_variable_defined?("@#{sym}")
+    elsif instance_variable_defined?(__ivar_for_name__(sym))
       true
     else
       super
@@ -124,6 +124,11 @@ class FastOpenStruct
   end
 
 private
+  @@ivar_for_names = {}
+  def __ivar_for_name__(name)
+    @@ivar_for_names[name] ||= "@#{name}".intern
+  end
+
   def __apparent_class__
     klass = self.class
     klass = klass.superclass until klass.name
