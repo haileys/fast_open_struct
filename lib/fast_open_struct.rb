@@ -43,8 +43,6 @@ class FastOpenStruct
   def []=(name, value)
     instance_variable_set __ivar_for_name__(name), value
     value
-  rescue RuntimeError
-    raise TypeError, "can't modify frozen #{__apparent_class__}"
   end
 
   def delete_field(name)

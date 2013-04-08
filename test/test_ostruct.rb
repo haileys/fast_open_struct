@@ -71,9 +71,9 @@ class TC_FastOpenStruct < Test::Unit::TestCase
     o = FastOpenStruct.new
     o.a = 'a'
     o.freeze
-    assert_raise(TypeError) {o.b = 'b'}
+    assert_raise(RuntimeError) {o.b = 'b'}
     assert_not_respond_to(o, :b)
-    assert_raise(TypeError) {o.a = 'z'}
+    assert_raise(RuntimeError) {o.a = 'z'}
     assert_equal('a', o.a)
     o = FastOpenStruct.new :a => 42
     def o.frozen?; nil end
