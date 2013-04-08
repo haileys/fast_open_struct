@@ -48,6 +48,15 @@ class TC_FastOpenStruct < Test::Unit::TestCase
     o1.a = 'b'
     assert_not_equal(o1, o2)
 
+    o2.a = 'b'
+    assert_equal(o1, o2)
+
+    o2.b = 'b'
+    assert_not_equal(o1, o2)
+
+    o1.b = 'b'
+    assert_equal(o1, o2)
+
     o2 = Object.new
     o2.instance_eval{@table = {:a => 'b'}}
     assert_not_equal(o1, o2)
