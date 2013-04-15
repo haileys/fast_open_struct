@@ -115,8 +115,12 @@ class TC_FastOpenStruct < Test::Unit::TestCase
   def test_getter
     os = FastOpenStruct.new
     os.foo = :bar
+    assert_equal :bar, os.foo
     assert_equal :bar, os[:foo]
     assert_equal :bar, os['foo']
+    assert_equal nil, os.bar
+    assert_equal nil, os[:bar]
+    assert_equal nil, os['bar']
   end
 
   def test_to_h

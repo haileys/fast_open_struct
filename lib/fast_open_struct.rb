@@ -37,7 +37,8 @@ class FastOpenStruct
   end
 
   def [](name)
-    instance_variable_get __ivar_for_name__(name)
+    ivar = __ivar_for_name__(name)
+    instance_variable_defined?(ivar) ? instance_variable_get(ivar) : nil
   end
 
   def []=(name, value)
@@ -108,8 +109,9 @@ class FastOpenStruct
   EQ = "=".freeze
 
   def method_missing(sym, *args)
-    if args.size == 0 and instance_variable_defined?(ivar = __ivar_for_name__(sym))
-      instance_variable_get(ivar)
+    if args.size == 0
+      ivar = __ivar_for_name__(sym)
+      instance_variable_defined?(ivar) ? instance_variable_get(ivar) : nil
     elsif args.size == 1 and sym[-1] == EQ
       instance_variable_set __ivar_for_setter__(sym), args[0]
     else
