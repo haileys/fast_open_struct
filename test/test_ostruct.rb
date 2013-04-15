@@ -34,6 +34,21 @@ class TC_FastOpenStruct < Test::Unit::TestCase
     assert_equal h, FastOpenStruct.new(Struct.new(*h.keys).new(*h.values)).to_h
   end
 
+  def test_capitalized_keys
+    h = {NAME: "John Smith"}
+    assert_equal h[:NAME], FastOpenStruct.new(h).NAME
+  end
+
+  def test_mixedcase_keys
+    h = {FullName: "John Smith"}
+    assert_equal h[:FullName], FastOpenStruct.new(h).FullName
+  end
+
+  def test_missing_key
+    h = {FullName: "John Smith"}
+    assert_equal nil, FastOpenStruct.new(h).UnknownName
+  end
+
   def test_equality
     o1 = FastOpenStruct.new
     o2 = FastOpenStruct.new
