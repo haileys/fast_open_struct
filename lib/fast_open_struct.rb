@@ -37,7 +37,8 @@ class FastOpenStruct
   end
 
   def [](name)
-    instance_variable_get __ivar_for_name__(name)
+    ivar = __ivar_for_name__(name)
+    instance_variable_defined?(ivar) ? instance_variable_get(ivar) : nil
   end
 
   def []=(name, value)
