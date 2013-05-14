@@ -6,6 +6,7 @@ It should be a drop in replacement for OpenStruct.
 
 [![Build Status via Travis CI](https://travis-ci.org/charliesome/fast_open_struct.png?branch=master)](https://travis-ci.org/charliesome/fast_open_struct)
 
+
 ## Performance
 
 FastOpenStruct is **very** fast when your OpenStructs tend to have static sets of attributes:
