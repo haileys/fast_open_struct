@@ -9,10 +9,13 @@ class FastOpenStruct
     def __create_class(keys)
       Class.new self do
         attr_accessor(*keys)
-        class << self
-          alias_method :new, :__new
-          public :new
-        end
+      end
+    end
+
+    def inherited(subclass)
+      class << subclass
+        alias_method :new, :__new
+        public :new
       end
     end
   end

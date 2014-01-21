@@ -26,17 +26,17 @@
 require "test/unit"
 require "fast_open_struct"
 
-class TC_FastOpenStruct < Test::Unit::TestCase
+module Testable_FastOpenStruct
   def test_initialize
     h = {name: "John Smith", age: 70, pension: 300}
-    assert_equal h, FastOpenStruct.new(h).to_h
-    assert_equal h, FastOpenStruct.new(FastOpenStruct.new(h)).to_h
-    assert_equal h, FastOpenStruct.new(Struct.new(*h.keys).new(*h.values)).to_h
+    assert_equal h, fast_open_struct_class.new(h).to_h
+    assert_equal h, fast_open_struct_class.new(fast_open_struct_class.new(h)).to_h
+    assert_equal h, fast_open_struct_class.new(Struct.new(*h.keys).new(*h.values)).to_h
   end
 
   def test_equality
-    o1 = FastOpenStruct.new
-    o2 = FastOpenStruct.new
+    o1 = fast_open_struct_class.new
+    o2 = fast_open_struct_class.new
     assert_equal(o1, o2)
 
     o1.a = 'a'
@@ -63,28 +63,28 @@ class TC_FastOpenStruct < Test::Unit::TestCase
   end
 
   def test_inspect
-    foo = FastOpenStruct.new
-    assert_equal("#<FastOpenStruct>", foo.inspect)
+    foo = fast_open_struct_class.new
+    assert_equal("#<#{fast_open_struct_class}>", foo.inspect)
     foo.bar = 1
     foo.baz = 2
-    assert_equal("#<FastOpenStruct bar=1, baz=2>", foo.inspect)
+    assert_equal("#<#{fast_open_struct_class} bar=1, baz=2>", foo.inspect)
 
-    foo = FastOpenStruct.new
-    foo.bar = FastOpenStruct.new
-    assert_equal('#<FastOpenStruct bar=#<FastOpenStruct>>', foo.inspect)
+    foo = fast_open_struct_class.new
+    foo.bar = fast_open_struct_class.new
+    assert_equal("#<#{fast_open_struct_class} bar=#<#{fast_open_struct_class}>>", foo.inspect)
     foo.bar.foo = foo
-    assert_equal('#<FastOpenStruct bar=#<FastOpenStruct foo=#<FastOpenStruct ...>>>', foo.inspect)
+    assert_equal("#<#{fast_open_struct_class} bar=#<#{fast_open_struct_class} foo=#<#{fast_open_struct_class} ...>>>", foo.inspect)
   end
 
   def test_frozen
-    o = FastOpenStruct.new
+    o = fast_open_struct_class.new
     o.a = 'a'
     o.freeze
     assert_raise(RuntimeError) {o.b = 'b'}
     assert_not_respond_to(o, :b)
     assert_raise(RuntimeError) {o.a = 'z'}
     assert_equal('a', o.a)
-    o = FastOpenStruct.new :a => 42
+    o = fast_open_struct_class.new :a => 42
     def o.frozen?; nil end
     o.freeze
     assert_raise(RuntimeError) {o.a = 1764}
@@ -92,7 +92,7 @@ class TC_FastOpenStruct < Test::Unit::TestCase
 
   def test_delete_field
     bug = '[ruby-core:33010]'
-    o = FastOpenStruct.new
+    o = fast_open_struct_class.new
     assert_not_respond_to(o, :a)
     assert_not_respond_to(o, :a=)
     o.a = 'a'
@@ -105,7 +105,7 @@ class TC_FastOpenStruct < Test::Unit::TestCase
   end
 
   def test_setter
-    os = FastOpenStruct.new
+    os = fast_open_struct_class.new
     os[:foo] = :bar
     assert_equal :bar, os.foo
     os['foo'] = :baz
@@ -113,7 +113,7 @@ class TC_FastOpenStruct < Test::Unit::TestCase
   end
 
   def test_getter
-    os = FastOpenStruct.new
+    os = fast_open_struct_class.new
     os.foo = :bar
     assert_equal :bar, os.foo
     assert_equal :bar, os[:foo]
@@ -125,7 +125,7 @@ class TC_FastOpenStruct < Test::Unit::TestCase
 
   def test_to_h
     h = {name: "John Smith", age: 70, pension: 300}
-    os = FastOpenStruct.new(h)
+    os = fast_open_struct_class.new(h)
     to_h = os.to_h
     assert_equal(h, to_h)
 
@@ -133,23 +133,45 @@ class TC_FastOpenStruct < Test::Unit::TestCase
     assert_equal(70, os.age)
     assert_equal(70, h[:age])
 
-    assert_equal(h, FastOpenStruct.new("name" => "John Smith", "age" => 70, pension: 300).to_h)
+    assert_equal(h, fast_open_struct_class.new("name" => "John Smith", "age" => 70, pension: 300).to_h)
   end
 
   def test_each_pair
     h = {name: "John Smith", age: 70, pension: 300}
-    os = FastOpenStruct.new(h)
-    assert_equal '#<Enumerator: #<FastOpenStruct name="John Smith", age=70, pension=300>:each_pair>', os.each_pair.inspect
+    os = fast_open_struct_class.new(h)
+    assert_equal %Q!#<Enumerator: #<#{fast_open_struct_class} name="John Smith", age=70, pension=300>:each_pair>!, os.each_pair.inspect
     assert_equal [[:name, "John Smith"], [:age, 70], [:pension, 300]], os.each_pair.to_a
   end
 
   def test_eql_and_hash
-    os1 = FastOpenStruct.new age: 70
-    os2 = FastOpenStruct.new age: 70.0
+    os1 = fast_open_struct_class.new age: 70
+    os2 = fast_open_struct_class.new age: 70.0
     assert_equal os1, os2
     assert_equal false, os1.eql?(os2)
     assert_not_equal os1.hash, os2.hash
     assert_equal true, os1.eql?(os1.dup)
     assert_equal os1.hash, os1.dup.hash
+  end
+end
+
+class TC_FastOpenStruct < Test::Unit::TestCase
+  include Testable_FastOpenStruct
+
+  private
+
+  def fast_open_struct_class
+    FastOpenStruct
+  end
+end
+
+class TC_SubFastOpenStruct < Test::Unit::TestCase
+  class SubFastOpenStruct < FastOpenStruct; end
+
+  include Testable_FastOpenStruct
+
+  private
+
+  def fast_open_struct_class
+    SubFastOpenStruct
   end
 end
