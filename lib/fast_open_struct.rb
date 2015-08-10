@@ -122,10 +122,10 @@ class FastOpenStruct
     end
   end
 
-  def respond_to?(sym)
-    if sym[-1] == EQ
-      respond_to?(sym[0...-1])
-    elsif instance_variable_defined?(__ivar_for_name__(sym))
+  def respond_to?(name, include_all=false)
+    if name[-1] == EQ
+      respond_to?(name[0...-1], include_all)
+    elsif instance_variable_defined?(__ivar_for_name__(name))
       true
     else
       super
