@@ -152,6 +152,13 @@ module Testable_FastOpenStruct
     assert_equal true, os1.eql?(os1.dup)
     assert_equal os1.hash, os1.dup.hash
   end
+  
+  def test_serialize
+    h = {name: "John Smith", age: 70, pension: 300}
+    os1 = fast_open_struct_class.new h
+    os2 = fast_open_struct_class.new h
+    assert_equal os2, Marshal.load(Marshal.dump(os1))
+  end
 end
 
 class TC_FastOpenStruct < Test::Unit::TestCase
