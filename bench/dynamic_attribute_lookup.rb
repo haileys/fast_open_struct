@@ -1,7 +1,7 @@
 require "benchmark"
 include Benchmark
 
-require "fast_open_struct"
+require_relative "../lib/fast_open_struct"
 require "ostruct"
 
 puts "Dynamic attribute lookup:"
