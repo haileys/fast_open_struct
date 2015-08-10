@@ -1,5 +1,3 @@
-require "set"
-
 class FastOpenStruct
   class << self
   private
