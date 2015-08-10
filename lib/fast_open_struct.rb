@@ -7,9 +7,10 @@ class FastOpenStruct
     private :__new
 
     def __create_class(keys)
-      Class.new self do
+      cls = Class.new self do
         attr_accessor(*keys)
       end
+      __be_serializable cls
     end
 
     def inherited(subclass)
@@ -17,6 +18,17 @@ class FastOpenStruct
         alias_method :new, :__new
         public :new
       end
+    end
+    
+    private
+    
+    def __be_serializable(klass)
+      last = constants.map { |const|
+        m = /\ACACHED_(\d+)\z/.match(const)
+        m ? m[1].to_i : 0
+      }.max
+      
+      const_set :"CACHED_#{last + 1}", klass
     end
   end
 
@@ -81,6 +93,7 @@ class FastOpenStruct
 
   def inspect
     str = "#<#{__apparent_class__}"
+    str.slice!(/::CACHED_\d+\z/)
     ids = (Thread.current[:__fast_open_struct_inspect_key__] ||= Set.new)
     return str << " ...>" if ids.include? object_id
     ids << object_id
